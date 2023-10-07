@@ -1,7 +1,8 @@
 package datawatch
 
 import (
-	"fmt"
+	"datamanage/log"
+	"encoding/json"
 	"time"
 )
 import "github.com/IBM/sarama"
@@ -13,8 +14,22 @@ type queueData struct {
 	Sql       string `json:"sql,omitempty"`
 }
 
-func sendToQueue(data queueData) {
-	fmt.Println(data.Sql)
+func (sdw *SourceDataWatcher) sendToQueue(data queueData) {
+	marshal, err := json.Marshal(data)
+	if err != nil {
+		return
+	}
+	topic := data.Database
+	producerMessage := &sarama.ProducerMessage{
+		Topic: data.Database,
+		Value: sarama.StringEncoder(marshal),
+	}
+	partition, offset, err := sdw.KafkaProducer.SendMessage(producerMessage)
+	if err != nil {
+		log.Error(err)
+	} else {
+		log.InfoF("sent topic:%s partition:%d offset:%d", topic, partition, offset)
+	}
 }
 
 func (sdw *SourceDataWatcher) InitQueue() {

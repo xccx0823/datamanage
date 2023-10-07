@@ -11,7 +11,6 @@ import (
 )
 
 func (sdw *SourceDataWatcher) OnDDL(e *replication.QueryEvent) error {
-	var tableName string
 	databaseName := string(e.Schema)
 	sql := string(e.Query)
 
@@ -23,6 +22,7 @@ func (sdw *SourceDataWatcher) OnDDL(e *replication.QueryEvent) error {
 		tableName := matches[1]
 		tables := sdw.monitorColumns[databaseName]
 		delete(tables, tableName)
+		sdw.sendToQueue(queueData{Database: databaseName, TableName: tableName, Sql: sql})
 	}
 
 	// drop table 语法删除的表
@@ -32,9 +32,8 @@ func (sdw *SourceDataWatcher) OnDDL(e *replication.QueryEvent) error {
 		tableName := matches[1]
 		tables := sdw.monitorColumns[databaseName]
 		delete(tables, tableName)
+		sdw.sendToQueue(queueData{Database: databaseName, TableName: tableName, Sql: sql})
 	}
-
-	sendToQueue(queueData{Database: databaseName, TableName: tableName, Sql: sql})
 
 	return nil
 }
@@ -71,7 +70,7 @@ func (sdw *SourceDataWatcher) OnRow(e *replication.RowsEvent, eType replication.
 		sql = deleteSql(databaseName, tableName, e.Rows, columns)
 	}
 
-	sendToQueue(queueData{Database: databaseName, TableName: tableName, Sql: sql})
+	sdw.sendToQueue(queueData{Database: databaseName, TableName: tableName, Sql: sql})
 
 	return nil
 }

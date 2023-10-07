@@ -10,17 +10,29 @@ import (
 )
 
 func (sdw *SourceDataWatcher) OnDDL(e *replication.QueryEvent) error {
-	query := strings.ToUpper(string(e.Query))
-	regex := regexp.MustCompile(`ALTER\s+TABLE\s+(\w+)`)
-	matches := regex.FindStringSubmatch(query)
-	databaseName := string(e.Schema)
-
 	var tableName string
+	databaseName := string(e.Schema)
+	query := string(e.Query)
+
+	// alter语法修改表结构
+	queryUpper := strings.ToUpper(query)
+	regex := regexp.MustCompile(`ALTER\s+TABLE\s+(\w+)`)
+	matches := regex.FindStringSubmatch(queryUpper)
 	if len(matches) > 1 {
 		tableName := matches[1]
 		tables := sdw.monitorColumns[databaseName]
 		delete(tables, tableName)
 	}
+
+	// drop table 语法删除的表
+	regex = regexp.MustCompile(`DROP\s+TABLE\s+IF\s+EXISTS\s+([\w_]+);`)
+	matches = regex.FindStringSubmatch(queryUpper)
+	if len(matches) > 1 {
+		tableName := matches[1]
+		tables := sdw.monitorColumns[databaseName]
+		delete(tables, tableName)
+	}
+
 	data := queueData{Database: databaseName, TableName: tableName, Sql: query}
 	sendToQueue(data)
 

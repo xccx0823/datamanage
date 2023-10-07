@@ -2,12 +2,16 @@ package datawatch
 
 import (
 	"datamanage/database"
+	"datamanage/log"
+	"fmt"
 	"github.com/go-mysql-org/go-mysql/mysql"
 )
 
 const (
-	queryPositionInfo = "SELECT * FROM data_manage.watch_binlog_info WHERE state=1"
-	showBinlogStatus  = "SHOW MASTER STATUS"
+	queryPositionInfo      = "SELECT * FROM data_manage.watch_binlog_info WHERE state=1"
+	showBinlogStatus       = "SHOW MASTER STATUS"
+	queryTableColumnInfo   = "SELECT column_name FROM information_schema.columns WHERE table_schema = '%s' and table_name = '%s'"
+	queryWatchTablesSchema = "SELECT * FROM data_manage.watch_table_info WHERE state=1"
 )
 
 // getPosition 以MySQL连接的host和port作为key，在数据表中存储其对应的同步位置，当没有设置其位置的时候，返回其起始值。
@@ -45,4 +49,24 @@ func getBinlogName() (string, uint32) {
 		return "", 0
 	}
 	return binlogStatus.File, binlogStatus.Position
+}
+
+func getTableColumns(databaseName, tableName string) []string {
+	db := database.GetSession()
+	var columns []string
+	err := db.Select(&columns, fmt.Sprintf(queryTableColumnInfo, databaseName, tableName))
+	if err != nil {
+		return nil
+	}
+	return columns
+}
+
+func getWatchTableInfo() []database.WatchTableInfo {
+	var infos []database.WatchTableInfo
+	db := database.GetSession()
+	err := db.Select(&infos, queryWatchTablesSchema)
+	if err != nil {
+		log.Error(err)
+	}
+	return infos
 }

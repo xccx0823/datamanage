@@ -2,8 +2,6 @@ package datawatch
 
 import (
 	"datamanage/conf"
-	"datamanage/database"
-	"datamanage/log"
 	"sync"
 	"time"
 )
@@ -26,6 +24,7 @@ type SourceDataWatcher struct {
 	// monitorSyncTime 同步一次的事件，单位秒
 	monitorTables   map[string][]string
 	monitorSyncTime int
+	monitorColumns  map[string]map[string][]string
 	monitorLock     sync.Mutex
 }
 
@@ -57,18 +56,10 @@ func (sdw *SourceDataWatcher) Run() {
 	sdw.watchBinlog()
 }
 
-// 查询 watch_table_info 表中所有可用信息
-const queryWatchTablesSchema = "SELECT * FROM data_manage.watch_table_info WHERE state=1"
-
 // SyncTables 同步数据库中所有需要监听的数据表
 func (sdw *SourceDataWatcher) SyncTables() {
 	for {
-		var infos []database.WatchTableInfo
-		db := database.GetSession()
-		err := db.Select(&infos, queryWatchTablesSchema)
-		if err != nil {
-			log.Error(err)
-		}
+		infos := getWatchTableInfo()
 		var databases = make(map[string][]string)
 		for _, info := range infos {
 			tables, ok := databases[info.DatabaseName]

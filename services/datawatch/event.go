@@ -2,7 +2,6 @@ package datawatch
 
 import (
 	"datamanage/log"
-	"fmt"
 	"github.com/duke-git/lancet/v2/convertor"
 	"github.com/duke-git/lancet/v2/slice"
 	"github.com/go-mysql-org/go-mysql/replication"
@@ -41,43 +40,57 @@ func (sdw *SourceDataWatcher) OnTableChanged(e *replication.TableMapEvent) error
 }
 
 func (sdw *SourceDataWatcher) OnRow(e *replication.RowsEvent, eType replication.EventType) error {
-
 	databaseName := convertor.ToString(e.Table.Schema)
 	tableName := convertor.ToString(e.Table.Table)
-
-	fmt.Println(sdw.monitorTables)
-
 	tables, ok := sdw.monitorTables[databaseName]
 	if !ok || !slice.Contain(tables, tableName) {
 		return nil
 	}
 
+	columns := sdw.getColumns(databaseName, tableName)
+
 	switch eType {
 
 	// 更新事件
 	case replication.UPDATE_ROWS_EVENTv0, replication.UPDATE_ROWS_EVENTv1, replication.UPDATE_ROWS_EVENTv2:
-		log.InfoF("更新 %s.%s %s", databaseName, tableName, e.Rows)
+		updateSql(e.Rows, columns)
 
 	// 插入数据事件
 	case replication.WRITE_ROWS_EVENTv0, replication.WRITE_ROWS_EVENTv1, replication.WRITE_ROWS_EVENTv2:
-		log.InfoF("插入 %s.%s %s", databaseName, tableName, e.Rows)
+		insertSql(e.Rows, columns)
 
 	// 删除数据事件
 	case replication.DELETE_ROWS_EVENTv0, replication.DELETE_ROWS_EVENTv1, replication.DELETE_ROWS_EVENTv2:
-		log.InfoF("删除 %s.%s %s", databaseName, tableName, e.Rows)
+		deleteSql(e.Rows, columns)
 	}
 
 	return nil
 }
 
-func updateSql(data [][]any) {
+func updateSql(data [][]any, columns []string) {
 
 }
 
-func deleteSql(data [][]any) {
+func deleteSql(data [][]any, columns []string) {
 
 }
 
-func insertSql(data [][]any) {
+func insertSql(data [][]any, columns []string) {
 
+}
+
+func (sdw *SourceDataWatcher) getColumns(databaseName, tableName string) []string {
+	tables, ok := sdw.monitorColumns[databaseName]
+	if !ok {
+		columns := getTableColumns(databaseName, tableName)
+		sdw.monitorColumns[databaseName][tableName] = columns
+		return columns
+	}
+	columns, ok := tables[tableName]
+	if !ok {
+		columns := getTableColumns(databaseName, tableName)
+		sdw.monitorColumns[databaseName][tableName] = columns
+		return columns
+	}
+	return columns
 }

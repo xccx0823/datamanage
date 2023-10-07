@@ -44,18 +44,6 @@ func (sdw *SourceDataWatcher) OnRotate(e *replication.RotateEvent) error {
 	return nil
 }
 
-func (sdw *SourceDataWatcher) OnTableChanged(e *replication.TableMapEvent) error {
-	// 修改以及创建数据时触发，会提供表信息
-	databaseName := convertor.ToString(e.Schema)
-	tableName := convertor.ToString(e.Table)
-	tables, ok := sdw.monitorTables[databaseName]
-	if !ok || !slice.Contain(tables, tableName) {
-		return nil
-	}
-	log.InfoF("Received Table Changed Event: %s", e.Table)
-	return nil
-}
-
 func (sdw *SourceDataWatcher) OnRow(e *replication.RowsEvent, eType replication.EventType) error {
 	databaseName := convertor.ToString(e.Table.Schema)
 	tableName := convertor.ToString(e.Table.Table)
@@ -115,7 +103,8 @@ func deleteSql(databaseName, tableName string, data [][]any, columns []string) s
 		column := columns[idx]
 		whereData = append(whereData, column+"="+convertor.ToString(row))
 	}
-	sql := fmt.Sprintf("delete from %s.%s where %s", databaseName, tableName, delData)
+	whereSql := strings.Join(whereData, " and ")
+	sql := fmt.Sprintf("delete from %s.%s where %s", databaseName, tableName, whereSql)
 	return sql
 }
 

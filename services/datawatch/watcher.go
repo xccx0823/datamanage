@@ -48,8 +48,6 @@ func (sdw *SourceDataWatcher) watchBinlog() {
 			switch e := ev.Event.(type) {
 			case *replication.RotateEvent:
 				parseEventError(sdw.OnRotate(e))
-			case *replication.TableMapEvent:
-				parseEventError(sdw.OnTableChanged(e))
 			case *replication.QueryEvent:
 				parseEventError(sdw.OnDDL(e))
 			case *replication.RowsEvent:

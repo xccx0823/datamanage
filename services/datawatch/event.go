@@ -5,20 +5,25 @@ import (
 	"github.com/duke-git/lancet/v2/convertor"
 	"github.com/duke-git/lancet/v2/slice"
 	"github.com/go-mysql-org/go-mysql/replication"
+	"regexp"
+	"strings"
 )
 
-// 事件通用信息
-type eventInfo struct {
-	Database  string `json:"database,omitempty"`
-	TableName string `json:"table_name,omitempty"`
-	Sql       string `json:"sql,omitempty"`
-}
-
 func (sdw *SourceDataWatcher) OnDDL(e *replication.QueryEvent) error {
-	// 创建数据库
-	// 创建表
-	// 修改以及创建数据时触发，会提供BEGIN消息
-	log.InfoF("Received DDL Event: Query: %s", e.Query)
+	query := strings.ToUpper(string(e.Query))
+	regex := regexp.MustCompile(`ALTER\s+TABLE\s+(\w+)`)
+	matches := regex.FindStringSubmatch(query)
+	databaseName := string(e.Schema)
+
+	var tableName string
+	if len(matches) > 1 {
+		tableName := matches[1]
+		tables := sdw.monitorColumns[databaseName]
+		delete(tables, tableName)
+	}
+	data := queueData{Database: databaseName, TableName: tableName, Sql: query}
+	sendToQueue(data)
+
 	return nil
 }
 

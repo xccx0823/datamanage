@@ -48,6 +48,8 @@ func New(settings *conf.Settings) *SourceDataWatcher {
 	}
 	options = append(options, WithMonitorSyncTime(syncTime))
 	watcher.SetOptions(dbConf.ServerId, options...)
+	watcher.monitorColumns = make(map[string]map[string][]string)
+	watcher.monitorTables = make(map[string][]string)
 	return watcher
 }
 

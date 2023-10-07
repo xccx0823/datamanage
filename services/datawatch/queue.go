@@ -1,5 +1,7 @@
 package datawatch
 
+import "fmt"
+
 // 事件通用信息
 type queueData struct {
 	Database  string `json:"database,omitempty"`
@@ -8,5 +10,5 @@ type queueData struct {
 }
 
 func sendToQueue(data queueData) {
-
+	fmt.Println(data.Sql)
 }

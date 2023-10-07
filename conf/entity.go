@@ -13,14 +13,18 @@ type Settings struct {
 
 	WatchServer struct {
 		DB struct {
-			ServerId            uint32 `yaml:"serverId"`
-			Host                string `yaml:"host"`
-			Port                uint16 `yaml:"port"`
-			User                string `yaml:"user"`
-			Password            string `yaml:"password"`
-			Charset             string `yaml:"charset"`
-			WithMonitorSyncTime int    `yaml:"withMonitorSyncTime"`
+			ServerId uint32 `yaml:"serverId"`
+			Host     string `yaml:"host"`
+			Port     uint16 `yaml:"port"`
+			User     string `yaml:"user"`
+			Password string `yaml:"password"`
+			Charset  string `yaml:"charset"`
 		} `yaml:"db"`
+		Kafka struct {
+			Address        []string `yaml:"address"`
+			FlushFrequency int      `yaml:"flushFrequency"`
+		} `yaml:"kafka"`
+		WithMonitorSyncTime int `yaml:"withMonitorSyncTime"`
 	} `yaml:"watchServer"`
 }
 

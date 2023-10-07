@@ -2,6 +2,7 @@ package datawatch
 
 import (
 	"datamanage/conf"
+	"github.com/IBM/sarama"
 	"sync"
 	"time"
 )
@@ -20,6 +21,11 @@ type SourceDataWatcher struct {
 	Password string
 	Charset  string
 
+	// Kafka 连接配置
+	KafkaAddress        []string
+	KafkaFlushFrequency int
+	KafkaProducer       sarama.SyncProducer
+
 	// monitorTables 所有的需要监听的数据表列表
 	// monitorSyncTime 同步一次的事件，单位秒
 	monitorTables   map[string][]string
@@ -36,17 +42,19 @@ type SourceDataWatcher struct {
 func New(settings *conf.Settings) *SourceDataWatcher {
 	watcher := &SourceDataWatcher{}
 	dbConf := settings.WatchServer.DB
+	kafkaConf := settings.WatchServer.Kafka
 	options := []Option{
 		WithDB(dbConf.Host, dbConf.Port, dbConf.User, dbConf.Password),
 	}
 	if dbConf.Charset != "" {
 		options = append(options, WithCharset(dbConf.Charset))
 	}
-	syncTime := dbConf.WithMonitorSyncTime
+	syncTime := settings.WatchServer.WithMonitorSyncTime
 	if syncTime == 0 {
 		syncTime = 5
 	}
 	options = append(options, WithMonitorSyncTime(syncTime))
+	options = append(options, WithKafka(kafkaConf.Address, kafkaConf.FlushFrequency))
 	watcher.SetOptions(dbConf.ServerId, options...)
 	watcher.monitorColumns = make(map[string]map[string][]string)
 	watcher.monitorTables = make(map[string][]string)
@@ -54,6 +62,7 @@ func New(settings *conf.Settings) *SourceDataWatcher {
 }
 
 func (sdw *SourceDataWatcher) Run() {
+	sdw.InitQueue()
 	go sdw.SyncTables()
 	sdw.watchBinlog()
 }

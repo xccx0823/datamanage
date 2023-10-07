@@ -12,6 +12,7 @@ watchServer:
     user: root
     password: 123456
     charset: utf8mb4
-  queue:
-    host: 127.0.0.1
-    port: 3306
+  kafka:
+    address:
+      - 0.0.0.0:9092
+    flushFrequency: 500

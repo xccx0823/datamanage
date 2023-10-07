@@ -1,0 +1,17 @@
+# 项目依赖数据存储的数据库
+dsn: root:123456@tcp(150.158.140.174:3306)/
+
+# binlog监听服务配置文件
+# db: MySQL数据库连接配置
+# queue: Kafka连接配置
+watchServer:
+  db:
+    serverId: 100
+    host: 150.158.140.174
+    port: 3306
+    user: root
+    password: 123456
+    charset: utf8mb4
+  queue:
+    host: 127.0.0.1
+    port: 3306

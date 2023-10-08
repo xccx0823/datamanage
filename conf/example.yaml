@@ -1,5 +1,5 @@
 # 项目依赖数据存储的数据库
-dsn: root:123456@tcp(150.158.140.174:3306)/
+dsn: root:123456@tcp(localhost:3306)/
 
 # binlog监听服务配置文件
 # db: MySQL数据库连接配置
@@ -7,12 +7,15 @@ dsn: root:123456@tcp(150.158.140.174:3306)/
 watchServer:
   db:
     serverId: 100
-    host: 150.158.140.174
+    host: localhost
     port: 3306
     user: root
     password: 123456
     charset: utf8mb4
   kafka:
     address:
-      - 0.0.0.0:9092
+      - 150.158.140.174:9092
+      - 150.158.140.174:9093
+      - 150.158.140.174:9094
     flushFrequency: 500
+    topic: dataStreaming

@@ -25,6 +25,7 @@ type SourceDataWatcher struct {
 	KafkaAddress        []string
 	KafkaFlushFrequency int
 	KafkaProducer       sarama.SyncProducer
+	KafkaTopic          string
 
 	// monitorTables 所有的需要监听的数据表列表
 	// monitorSyncTime 同步一次的事件，单位秒
@@ -54,7 +55,7 @@ func New(settings *conf.Settings) *SourceDataWatcher {
 		syncTime = 5
 	}
 	options = append(options, WithMonitorSyncTime(syncTime))
-	options = append(options, WithKafka(kafkaConf.Address, kafkaConf.FlushFrequency))
+	options = append(options, WithKafka(kafkaConf.Address, kafkaConf.FlushFrequency, kafkaConf.Topic))
 	watcher.SetOptions(dbConf.ServerId, options...)
 	watcher.monitorColumns = make(map[string]map[string][]string)
 	watcher.monitorTables = make(map[string][]string)

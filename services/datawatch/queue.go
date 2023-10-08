@@ -3,9 +3,8 @@ package datawatch
 import (
 	"datamanage/log"
 	"encoding/json"
-	"time"
+	"github.com/IBM/sarama"
 )
-import "github.com/IBM/sarama"
 
 // 事件通用信息
 type queueData struct {
@@ -19,25 +18,24 @@ func (sdw *SourceDataWatcher) sendToQueue(data queueData) {
 	if err != nil {
 		return
 	}
-	topic := data.Database
 	producerMessage := &sarama.ProducerMessage{
-		Topic: data.Database,
+		Topic: sdw.KafkaTopic,
 		Value: sarama.StringEncoder(marshal),
 	}
 	partition, offset, err := sdw.KafkaProducer.SendMessage(producerMessage)
 	if err != nil {
 		log.Error(err)
 	} else {
-		log.InfoF("sent topic:%s partition:%d offset:%d", topic, partition, offset)
+		log.InfoF("sent topic:%s partition:%d offset:%d", sdw.KafkaTopic, partition, offset)
 	}
 }
 
 func (sdw *SourceDataWatcher) InitQueue() {
 	config := sarama.NewConfig()
-	config.Producer.RequiredAcks = sarama.WaitForLocal
-	config.Producer.Compression = sarama.CompressionSnappy
-	config.Producer.Flush.Frequency = time.Duration(sdw.KafkaFlushFrequency) * time.Millisecond
+	config.Producer.RequiredAcks = sarama.WaitForAll
+	config.Producer.Partitioner = sarama.NewRandomPartitioner
 	config.Producer.Return.Successes = true
+	config.Producer.Return.Errors = true
 	producer, err := sarama.NewSyncProducer(sdw.KafkaAddress, config)
 	if err != nil {
 		panic(err)

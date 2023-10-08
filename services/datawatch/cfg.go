@@ -31,9 +31,10 @@ func WithMonitorSyncTime(syncTime int) Option {
 	}
 }
 
-func WithKafka(kafkaAddress []string, kafkaFlushFrequency int) Option {
+func WithKafka(kafkaAddress []string, kafkaFlushFrequency int, kafkaTopic string) Option {
 	return func(sdw *SourceDataWatcher) {
 		sdw.KafkaAddress = kafkaAddress
 		sdw.KafkaFlushFrequency = kafkaFlushFrequency
+		sdw.KafkaTopic = kafkaTopic
 	}
 }

@@ -23,6 +23,7 @@ type Settings struct {
 		Kafka struct {
 			Address        []string `yaml:"address"`
 			FlushFrequency int      `yaml:"flushFrequency"`
+			Topic          string   `yaml:"topic"`
 		} `yaml:"kafka"`
 		WithMonitorSyncTime int `yaml:"withMonitorSyncTime"`
 	} `yaml:"watchServer"`

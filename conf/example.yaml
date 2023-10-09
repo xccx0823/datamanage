@@ -3,7 +3,7 @@ dsn: root:123456@tcp(localhost:3306)/
 
 # binlog监听服务配置文件
 # db: MySQL数据库连接配置
-# queue: Kafka连接配置
+# kafka: Kafka连接配置
 watchServer:
   db:
     serverId: 100

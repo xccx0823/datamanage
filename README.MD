@@ -3,7 +3,7 @@
 ### 创建网络
 
 ```shell
-docker network create zookeeper_networ
+docker network create zookeeper_network
 ```
 
 ### 部署zookeeper

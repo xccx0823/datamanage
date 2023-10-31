@@ -22,7 +22,7 @@ services:
     container_name: zoo1
     hostname: zoo1
     ports:
-      - 2181:2181
+      - "2181:2181"
     volumes:
       - "/root/kafka_learn/zookeeper/zoo1/data:/data"
       - "/root/kafka_learn/zookeeper/zoo1/datalog:/datalog"
@@ -35,7 +35,7 @@ services:
     container_name: zoo2
     hostname: zoo2
     ports:
-      - 2182:2181
+      - "2182:2181"
     volumes:
       - "/root/kafka_learn/zookeeper/zoo2/data:/data"
       - "/root/kafka_learn/zookeeper/zoo2/datalog:/datalog"
@@ -48,7 +48,7 @@ services:
     container_name: zoo3
     hostname: zoo3
     ports:
-      - 2183:2181
+      - "2183:2181"
     volumes:
       - "/root/kafka_learn/zookeeper/zoo3/data:/data"
       - "/root/kafka_learn/zookeeper/zoo3/datalog:/datalog"

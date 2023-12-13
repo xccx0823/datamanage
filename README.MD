@@ -6,15 +6,15 @@ Go语言实现的数据库管理工具
 
 监听`MySQL binlog`日志，将日志解析为SQL发送到`Kafka`中供消费端消费。
 
-如何在服务器上使用docker部署kafka
+#### 如何在服务器上使用docker部署kafka
 
-创建网络
+1.创建网络
 
 ```shell
 docker network create zookeeper_network
 ```
 
-部署zookeeper
+2.部署zookeeper
 
 ```yaml
 version: '3'
@@ -65,7 +65,7 @@ services:
       ZOO_SERVERS: server.1=zoo1:2888:3888;2181 server.2=zoo2:2888:3888;2181 server.3=0.0.0.0:2888:3888;2181
 ```
 
-部署kafka
+3.部署kafka
 
 ```yaml
 version: '3'
